@@ -22,10 +22,10 @@ export default function Navbar() {
         </Link>
 
         {user && (
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-10">
 
             {/* USER INFO PILL (ENHANCED SIZE) */}
-            <div className="flex items-center gap-7 px-3 py-5 rounded-full bg-white/5 border border-white/10 shadow-lg backdrop-blur-md">
+            <div className="flex items-center gap-10 px-12 py-6 rounded-full bg-white/5 border border-white/10 shadow-lg backdrop-blur-md">
 
               <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white text-lg shadow-md">
                 {user.firstName?.charAt(0)?.toUpperCase()}
