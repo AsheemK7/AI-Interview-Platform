@@ -13,6 +13,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   "http://localhost:5173",
   "https://ai-interview-platform-one-tau.vercel.app",
+  "https://ai-interview-platform-d624aucqf-asheemk7s-projects.vercel.app"
 ];
 
 // ✅ Socket.IO CORS
@@ -25,12 +26,18 @@ const io = new Server(server, {
 });
 
 // ── Middleware ──────────────────────────────────────────────
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
 app.use(express.json());
 
@@ -38,6 +45,11 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/interview", require("./routes/interview"));
 
+// app.get("/", (req, res) => {
+//   res.json({
+//     message: "AI Interview Backend is running 🚀"
+//   });
+// });
 // ── Database ────────────────────────────────────────────────
 mongoose
   .connect(process.env.MONGO_URI)

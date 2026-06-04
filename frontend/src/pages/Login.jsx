@@ -28,7 +28,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/login", form);
+      const res = await api.post("/api/auth/login", form);
 
       login(res.data.token, res.data.user);
 
@@ -67,7 +67,7 @@ export default function Login() {
       <div style={styles.wrapper}>
         <div style={styles.card}>
           <h2 style={styles.title}>
-            Welcome Back 👋
+            Welcome Back
           </h2>
 
           <p style={styles.subtitle}>
