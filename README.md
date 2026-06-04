@@ -1,5 +1,7 @@
 # 🎤 AI Interview Practice App
 
+🚀 Live Demo: https://ai-interview-platform-one-tau.vercel.app
+
 A full-stack AI-powered interview practice tool using React + Node.js + Gemini + Socket.IO.
 
 ---
