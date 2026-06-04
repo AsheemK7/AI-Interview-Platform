@@ -28,7 +28,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await api.post("/api/auth/login", form);
+      const res = await api.post("/auth/login", form);
 
       login(res.data.token, res.data.user);
 
