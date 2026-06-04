@@ -4,7 +4,7 @@ const http = require("http");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const axios = require("axios");
 
 const app = express();
 const server = http.createServer(app);
@@ -44,12 +44,7 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("MongoDB error:", err));
 
-// ── Gemini setup ────────────────────────────────────────────
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY
-);
-
-// ── Socket.IO — Real-time interview chat ────────────────────
+// ── Socket.IO ───────────────────────────────────────────────
 io.on("connection", (socket) => {
   console.log("🔌 User connected:", socket.id);
 
@@ -57,52 +52,32 @@ io.on("connection", (socket) => {
   let interviewConfig = null;
 
   // Start interview
-  socket.on(
-    "start_interview",
-    ({ position, experience, difficulty }) => {
-      interviewConfig = {
-        position,
-        experience,
-        difficulty,
-      };
+  socket.on("start_interview", ({ position, experience, difficulty }) => {
+    interviewConfig = { position, experience, difficulty };
+    chatHistory = [];
 
-      chatHistory = [];
-
-const systemPrompt = `
+    const systemPrompt = `
 You are Ayesha, a professional and friendly interviewer conducting a realistic mock job interview.
 
-Your name is Ayesha.
-Never use placeholders like [Candidate's Name] or [Interviewer's Name].
-
 Role: ${position}
-Candidate experience: ${experience}
-Difficulty level: ${difficulty}
+Experience: ${experience}
+Difficulty: ${difficulty}
 
-Interview Rules:
-- Introduce yourself as Ayesha at the beginning.
-- Greet the candidate naturally.
-- Call the user "Candidate" naturally when needed.
-- Ask ONLY ONE interview question at a time.
-- Wait for the candidate's answer before asking the next question.
-- Keep questions highly relevant to the role.
-- Give short encouraging feedback before moving to the next question.
-- Make the interview feel realistic and professional.
-- Do NOT use placeholder text.
-- After exactly 5 interview questions, say:
-"Thank you! The interview is now complete."
-and provide a short performance summary.
-
-Start the interview by introducing yourself as Ayesha and asking the first interview question naturally.
+Rules:
+- Ask ONE question at a time
+- Be professional HR interviewer
+- Give short feedback
+- After 5 questions, end interview with summary
+Start interview now.
 `;
 
-      chatHistory.push({
-        role: "user",
-        parts: [{ text: systemPrompt }],
-      });
+    chatHistory.push({
+      role: "system",
+      parts: [{ text: systemPrompt }],
+    });
 
-      getAIResponse(socket, chatHistory);
-    }
-  );
+    getAIResponse(socket, chatHistory);
+  });
 
   // User message
   socket.on("user_message", async ({ message }) => {
@@ -117,45 +92,42 @@ Start the interview by introducing yourself as Ayesha and asking the first inter
   });
 
   socket.on("disconnect", () => {
-    console.log(
-      "❌ User disconnected:",
-      socket.id
-    );
+    console.log("❌ User disconnected:", socket.id);
   });
 });
 
-// ── AI Response Function ────────────────────────────────────
+// ── GROQ AI FUNCTION ────────────────────────────────────────
 async function getAIResponse(socket, chatHistory) {
   try {
     socket.emit("ai_typing", true);
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-    });
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
+        messages: chatHistory.map((msg) => ({
+          role: msg.role === "model" ? "assistant" : "user",
+          content: msg.parts[0].text,
+        })),
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const chat = model.startChat({
-      history: chatHistory.slice(0, -1),
-    });
+    const text = response.data.choices[0].message.content;
 
-    const lastMessage =
-      chatHistory[chatHistory.length - 1].parts[0]
-        .text;
-
-    const result =
-      await chat.sendMessage(lastMessage);
-
-    const text = result.response.text();
-
-    // Save AI reply
     chatHistory.push({
       role: "model",
       parts: [{ text }],
     });
 
     socket.emit("ai_typing", false);
-    socket.emit("ai_message", {
-      message: text,
-    });
+    socket.emit("ai_message", { message: text });
   } catch (err) {
     socket.emit("ai_typing", false);
     socket.emit("error", {
@@ -168,7 +140,5 @@ async function getAIResponse(socket, chatHistory) {
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(
-    `🚀 Server running on port ${PORT}`
-  );
+  console.log(`🚀 Server running on port ${PORT}`);
 });
