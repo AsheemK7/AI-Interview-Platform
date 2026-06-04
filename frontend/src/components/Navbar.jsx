@@ -54,7 +54,7 @@ export default function Navbar() {
               {/* Welcome Text */}
               <div className="leading-tight">
                 <p className="text-sm text-slate-400">
-                  Welcome back 👋
+                  Welcome back 
                 </p>
 
                 <p className="text-white font-bold text-xl">
@@ -73,7 +73,7 @@ export default function Navbar() {
                 hover:shadow-red-500/30
                 transition-all duration-300
                 text-white
-                px-8 py-4
+                px-12 py-6
                 rounded-3xl
                 font-bold
                 shadow-xl

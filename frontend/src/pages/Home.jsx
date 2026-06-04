@@ -38,7 +38,7 @@ const handleStart = async () => {
 
 return ( <div className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden">
 
-```
+
   <div className="absolute top-[-150px] left-[-100px] w-[400px] h-[400px] bg-purple-600/20 blur-[120px] rounded-full"></div>
 
   <div className="absolute bottom-[-150px] right-[-100px] w-[400px] h-[400px] bg-cyan-500/20 blur-[120px] rounded-full"></div>
