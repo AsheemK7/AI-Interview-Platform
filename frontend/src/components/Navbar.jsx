@@ -22,39 +22,62 @@ export default function Navbar() {
         </Link>
 
         {user && (
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-6">
 
-            {/* USER INFO PILL (ENHANCED SIZE) */}
-            <div className="flex items-center gap-10 px-12 py-6 rounded-full bg-white/5 border border-white/10 shadow-lg backdrop-blur-md">
-
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white text-lg shadow-md">
+            {/* USER INFO PILL */}
+            <div
+              className="
+                flex items-center gap-4
+                px-8 py-5
+                rounded-full
+                bg-white/5
+                border border-white/10
+                min-w-[280px]
+                shadow-lg
+              "
+            >
+              {/* Avatar */}
+              <div
+                className="
+                  w-14 h-14
+                  rounded-full
+                  bg-gradient-to-br
+                  from-blue-500 to-purple-600
+                  flex items-center justify-center
+                  font-bold text-white text-xl
+                  shadow-md
+                "
+              >
                 {user.firstName?.charAt(0)?.toUpperCase()}
               </div>
 
+              {/* Welcome Text */}
               <div className="leading-tight">
-                <p className="text-xs text-slate-400">
+                <p className="text-sm text-slate-400">
                   Welcome back 👋
                 </p>
 
-                <p className="text-white font-semibold text-sm">
+                <p className="text-white font-bold text-xl">
                   {user.firstName}
                 </p>
               </div>
             </div>
 
-            {/* LOGOUT BUTTON (balanced + premium) */}
+            {/* LOGOUT BUTTON */}
             <button
               onClick={handleLogout}
               className="
-                bg-gradient-to-r from-red-500 to-rose-600
-                hover:scale-105 hover:shadow-red-500/30
+                bg-gradient-to-r
+                from-red-500 to-rose-600
+                hover:scale-105
+                hover:shadow-red-500/30
                 transition-all duration-300
                 text-white
-                px-6 py-3
-                rounded-2xl
-                font-semibold
-                shadow-lg
-                text-sm
+                px-8 py-4
+                rounded-3xl
+                font-bold
+                shadow-xl
+                text-base
               "
             >
               Logout

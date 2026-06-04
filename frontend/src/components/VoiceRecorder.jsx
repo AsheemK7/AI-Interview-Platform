@@ -4,30 +4,54 @@ export default function VoiceRecorder({ onTranscript }) {
   const [recording, setRecording] = useState(false);
   const recognitionRef = useRef(null);
 
-  const startRecording = () => {
+  const toggleRecording = () => {
     const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Voice input not supported in this browser. Use Chrome/Edge.");
+      alert(
+        "Your browser doesn't support voice input. Please use Chrome or Edge."
+      );
       return;
     }
 
+    // Stop recording
+    if (recording) {
+      recognitionRef.current?.stop();
+      setRecording(false);
+      return;
+    }
+
+    // Start recording
     const recognition = new SpeechRecognition();
+
     recognition.lang = "en-US";
-    recognition.interimResults = false;
+    recognition.interimResults = true;
+    recognition.continuous = true;
 
     recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      onTranscript(transcript);
+      let transcript = "";
+
+      for (let i = 0; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+
+      recognitionRef.current.transcript = transcript;
     };
 
-    recognition.onerror = (e) => {
+    recognition.onerror = (e) =>
       console.error("Speech error:", e.error);
-    };
 
     recognition.onend = () => {
       setRecording(false);
+
+      const finalText =
+        recognitionRef.current?.transcript;
+
+      if (finalText?.trim()) {
+        onTranscript(finalText);
+      }
     };
 
     recognitionRef.current = recognition;
@@ -35,84 +59,29 @@ export default function VoiceRecorder({ onTranscript }) {
     setRecording(true);
   };
 
-  const stopRecording = () => {
-    recognitionRef.current?.stop();
-    setRecording(false);
-  };
-
   return (
-    <div style={styles.wrapper}>
-      <button
-        onMouseDown={startRecording}
-        onMouseUp={stopRecording}
-        onMouseLeave={stopRecording}
-        onTouchStart={startRecording}
-        onTouchEnd={stopRecording}
-        style={{
-          ...styles.button,
-          ...(recording ? styles.recording : {}),
-        }}
-      >
-        <div style={styles.icon}>
-          {recording ? "🔴" : "🎤"}
-        </div>
-
-        <span style={styles.text}>
-          {recording ? "Listening..." : "Hold to Speak"}
-        </span>
-
-        {recording && <div style={styles.pulse} />}
-      </button>
-    </div>
+    <button
+      onClick={toggleRecording}
+      style={{
+        padding: "0.9rem 1.8rem",
+        background: recording
+          ? "#ef4444"
+          : "#6366f1",
+        color: "#fff",
+        border: "none",
+        borderRadius: "50px",
+        fontSize: "1rem",
+        fontWeight: "600",
+        cursor: "pointer",
+        transition: "0.25s ease",
+        boxShadow: recording
+          ? "0 0 0 8px rgba(239,68,68,0.25)"
+          : "0 8px 20px rgba(99,102,241,0.25)",
+      }}
+    >
+      {recording
+        ? "🔴 Tap to Stop"
+        : "🎤 Tap to Speak"}
+    </button>
   );
 }
-
-const styles = {
-  wrapper: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  button: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    padding: "0.9rem 1.4rem",
-    borderRadius: "999px",
-    border: "1px solid rgba(255,255,255,0.15)",
-    background: "rgba(255,255,255,0.06)",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: "500",
-    backdropFilter: "blur(10px)",
-    transition: "all 0.2s ease",
-    overflow: "hidden",
-  },
-
-  recording: {
-    background: "rgba(239,68,68,0.15)",
-    border: "1px solid rgba(239,68,68,0.4)",
-    boxShadow: "0 0 25px rgba(239,68,68,0.3)",
-    transform: "scale(1.02)",
-  },
-
-  icon: {
-    fontSize: "1.1rem",
-  },
-
-  text: {
-    whiteSpace: "nowrap",
-  },
-
-  pulse: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: "999px",
-    animation: "pulse 1.2s infinite",
-    background: "rgba(239,68,68,0.2)",
-  },
-};

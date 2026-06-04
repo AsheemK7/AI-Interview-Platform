@@ -107,7 +107,13 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
+
+    /* 🔥 MOVING GRADIENT */
+    background:
+      "linear-gradient(-45deg, #020617, #0f172a, #1e3a8a, #4c1d95, #0369a1)",
+    backgroundSize: "400% 400%",
+    animation: "gradientMove 15s ease infinite",
+
     fontFamily: "sans-serif",
   },
 
